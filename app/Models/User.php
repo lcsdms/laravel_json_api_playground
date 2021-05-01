@@ -11,6 +11,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $dateFormat = 'Y-m-d H:i:sO';
+
     /**
      * The attributes that are mass assignable.
      *

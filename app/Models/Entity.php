@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Entity extends Model
 {
     use HasFactory;
+
+    protected $dateFormat = 'Y-m-d H:i:sO';
     protected $fillable = [
         'entity_type',
         'entity_id',

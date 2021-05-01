@@ -9,6 +9,7 @@ class Company extends Model
 {
 
     use HasFactory;
+    protected $dateFormat = 'Y-m-d H:i:sO';
 
     protected $fillable = [
         'name',

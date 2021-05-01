@@ -9,6 +9,8 @@ class Person extends Model
 {
     use HasFactory;
 
+    protected $dateFormat = 'Y-m-d H:i:sO';
+
     protected $fillable = [
         'name',
         'social_name',

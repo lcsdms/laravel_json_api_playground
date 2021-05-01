@@ -9,6 +9,7 @@ class Email extends Model
 {
     use HasFactory;
 
+    protected $dateFormat = 'Y-m-d H:i:sO';
     protected $fillable = [
         'entity_id',
         'address',
