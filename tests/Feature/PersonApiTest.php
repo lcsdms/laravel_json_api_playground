@@ -15,7 +15,7 @@ class PersonApiTest extends TestCase
     use WithFaker;
 
     /** @test */
-    public function can_create_new_person()
+    public function create_test()
     {
         $this->withoutExceptionHandling();
 
@@ -47,7 +47,7 @@ class PersonApiTest extends TestCase
     /**
      * @test
      */
-    public function can_get_people_list()
+    public function index_test()
     {
         $this->withoutExceptionHandling();
 
