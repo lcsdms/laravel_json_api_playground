@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use LaravelJsonApi\Laravel\Facades\JsonApiRoute;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+//https://laraveljsonapi.io/docs/1.0/routing/
+JsonApiRoute::server('v1')
+    ->prefix('v1')
+    ->namespace('App\Http\Controllers\Api\V1')
+    ->resources(function ($server) {
+        $server->resource('people');
+        $server->resource('emails');
+    });

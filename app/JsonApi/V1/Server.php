@@ -2,6 +2,8 @@
 
 namespace App\JsonApi\V1;
 
+use App\JsonApi\V1\Emails\EmailSchema;
+use App\JsonApi\V1\People\PersonSchema;
 use LaravelJsonApi\Core\Server\Server as BaseServer;
 
 class Server extends BaseServer
@@ -32,7 +34,8 @@ class Server extends BaseServer
     protected function allSchemas(): array
     {
         return [
-            // @TODO
+            PersonSchema::class,
+            EmailSchema::class
         ];
     }
 }
