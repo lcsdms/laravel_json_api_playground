@@ -56,7 +56,7 @@ class PersonApiTest extends TestCase
         $response = $this
             ->jsonApi()
             ->expects('people')
-            ->post('/api/v1/people');
+            ->get('/api/v1/people');
 
         $response->assertFetchedMany($people);
 
