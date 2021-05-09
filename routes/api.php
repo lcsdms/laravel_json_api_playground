@@ -24,6 +24,8 @@ JsonApiRoute::server('v1')
     ->prefix('v1')
     ->namespace('App\Http\Controllers\Api\V1')
     ->resources(function ($server) {
-        $server->resource('people');
+        $server->resource('people')->relationships(function ($relationships) {
+            $relationships->hasMany('emails');
+        });
         $server->resource('emails');
     });

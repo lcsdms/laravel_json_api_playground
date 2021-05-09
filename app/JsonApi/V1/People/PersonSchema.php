@@ -2,6 +2,7 @@
 
 namespace App\JsonApi\V1\People;
 
+use App\JsonApi\Fields\HasManyThroughEntity;
 use App\Models\Person;
 use LaravelJsonApi\Eloquent\Contracts\Paginator;
 use LaravelJsonApi\Eloquent\Fields\DateTime;
@@ -38,6 +39,7 @@ class PersonSchema extends Schema
             DateTime::make('createdAt','created_at')->sortable()->readOnly(),
             DateTime::make('updatedAt','updated_at')->sortable()->readOnly(),
             DateTime::make('deletedAt','deleted_at')->sortable()->readOnly(),
+            HasManyThroughEntity::make('emails')->deleteDetachedModels()
         ];
     }
 

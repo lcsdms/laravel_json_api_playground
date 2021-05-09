@@ -17,7 +17,8 @@ class EmailRequest extends ResourceRequest
     public function rules(): array
     {
         return [
-            'address' => 'email|required'
+            'address' => 'email|required',
+            'person' => 'required_without:company',
         ];
 
     }

@@ -13,7 +13,11 @@ class Email extends Model
     protected $fillable = [
         'entity_id',
         'address',
-        'isMainEmailAddress'
+        'is_main_email_address'
+    ];
+
+    protected $attributes = [
+        'is_main_email_address' => false,
     ];
 
     public function entity()
@@ -21,4 +25,8 @@ class Email extends Model
         return $this->belongsTo(Entity::class);
     }
 
+    public function person()
+    {
+        return $this->hasOneThrough(Person::class,Entity::class,'entity_id','entity_id');
+    }
 }

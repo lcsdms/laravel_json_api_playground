@@ -23,11 +23,6 @@ class Entity extends Model
         return $this->morphTo()->withTrashed();
     }
 
-    public function person()
-    {
-        return $this->morphTo()->withTrashed();
-    }
-
     public function addresses()
     {
         return $this->morphMany('App\Models\Address', 'model');

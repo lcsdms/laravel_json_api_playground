@@ -2,8 +2,10 @@
 
 namespace App\JsonApi\V1\Emails;
 
+use App\JsonApi\Fields\HasOneThroughEntity;
 use App\Models\Email;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use LaravelJsonApi\Eloquent\Contracts\Paginator;
 use LaravelJsonApi\Eloquent\Fields\Boolean;
 use LaravelJsonApi\Eloquent\Fields\DateTime;
@@ -37,6 +39,7 @@ class EmailSchema extends Schema
             Boolean::make('isPrimary','is_primary'),
             DateTime::make('createdAt','created_at')->sortable()->readOnly(),
             DateTime::make('updatedAt', 'updated_at')->sortable()->readOnly(),
+            HasOneThroughEntity::make('person')
         ];
     }
 
