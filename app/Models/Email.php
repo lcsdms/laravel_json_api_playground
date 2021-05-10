@@ -27,6 +27,13 @@ class Email extends Model
 
     public function person()
     {
-        return $this->hasOneThrough(Person::class,Entity::class,'entity_id','entity_id');
+        return $this->hasOneThrough(
+            Person::class,
+            Entity::class,
+            'id',
+            'id',
+            'entity_id',
+            'entity_id'
+        );
     }
 }

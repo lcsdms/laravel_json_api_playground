@@ -18,7 +18,7 @@ class EmailRequest extends ResourceRequest
     {
         return [
             'address' => 'email|required',
-            'person' => 'required_without:company',
+            'person' => ['required_without:company',JsonApiRule::toOne()],
         ];
 
     }
