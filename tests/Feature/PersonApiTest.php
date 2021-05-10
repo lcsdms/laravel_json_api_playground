@@ -102,74 +102,9 @@ class PersonApiTest extends TestCase
         $response = $this
             ->jsonApi()
             ->expects('people')
-            ->includePaths("emails")
             ->get($self);
 
-        $response->assertFetchedOne($expected);
-    }
-
-    /** @test */
-    public function can_create_new_person_and_attach_email()
-    {
-        $this->withoutExceptionHandling();
-
-        $person = Person::factory()->make();
-
-        $data = [
-            'type' => 'people',
-            'attributes' => [
-                'name' => $person->name,
-                'socialName' => $person->social_name,
-                'documentNumber' => $person->document_number,
-                'birthDate' => $person->birth_date
-            ]
-        ];
-
-        $response = $this
-            ->jsonApi()
-            ->expects('people')
-            ->withData($data)
-            ->post('/api/v1/people');
-
-        $response->assertCreated();
-
-        $this->assertDatabaseHas('people', [
-            'id' => $response->id()
-        ]);
-
-        $personId = $response->id();
-
-        $emailAddress = $this->faker->safeEmail;
-        $data = [
-            'type' => 'emails',
-            'attributes' => [
-                'address' => $emailAddress,
-            ],
-            'relationships' => [
-                'person' => [
-                    'data' => [
-                        'type' => 'people',
-                        'id' => (string)$personId,
-                    ]
-                ],
-            ],
-        ];
-
-        $emailResponse = $this
-            ->jsonApi()
-            ->expects('emails')
-            ->withData($data)
-            ->post('/api/v1/emails');
-
-        $emailResponse->assertCreated();
-
-        $person = Person::find($personId);
-
-        $this->assertDatabaseHas('emails', [
-            'id' => $emailResponse->id(),
-            'address' => $emailResponse->json('data.attributes.address'),
-            'entity_id' => $person->entity->id
-        ]);
+        $response->assertFetchedOneExact($expected);
     }
 
     /** @test */
@@ -241,60 +176,11 @@ class PersonApiTest extends TestCase
         ]);
     }
 
-
-    /** @test
-     * @link https://laraveljsonapi.io/docs/1.0/testing/relationships.html#attach-to-many-testing
-     */
-    public function attach_to_many_test()
-    {
-        //todo POST -> Adiciona item na lista
-        //todo PATCH -> Limpa os existentes e Atualiza os relacionamentos
-        //todo teste
-        $this->withoutExceptionHandling();
-        $this->markTestSkipped('O email nao é criado sozinho antes de ser vinculado');
-
-        $person = Person::factory()->create();
-        $person->entity->emails()->saveMany(Email::factory()->count(2)->make());
-
-        $emailAddress = $this->faker->safeEmail;
-        $data = [
-            'type' => 'emails',
-            'attributes' => [
-                'address' => $emailAddress,
-            ],
-            'relationships' => [
-                'person' => [
-                    'data' => [
-                        'type' => 'people',
-                        'id' => (string)$personId,
-                    ]
-                ],
-            ],
-        ];
-
-        $emailResponse = $this
-            ->jsonApi()
-            ->expects('emails')
-            ->withData($data)
-            ->post('/api/v1/emails');
-
-        $emailResponse->assertCreated();
-
-        $person = Person::find($personId);
-
-        $this->assertDatabaseHas('emails', [
-            'id' => $emailResponse->id(),
-            'address' => $emailResponse->json('data.attributes.address'),
-            'entity_id' => $person->entity->id
-        ]);
-    }
-
     /** @test
      * @link https://laraveljsonapi.io/docs/1.0/testing/relationships.html#detach-to-many-testing
      */
     public function detach_to_many_test()
     {
-        //todo POST -> Adiciona item na lista
         $this->withoutExceptionHandling();
 
         $person = Person::factory()->create();
