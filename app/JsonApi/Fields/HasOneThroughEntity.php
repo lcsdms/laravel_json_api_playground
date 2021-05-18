@@ -31,9 +31,10 @@ class HasOneThroughEntity extends HasOneThrough implements FillableToOne
     public function fill(Model $model, ?array $identifier): void
     {
         //todo refatorar para usar uma trait aqui
+        //todo implementar método para saber quando usar person ou company aqui no futuro
         $entity = \App\Models\Entity::select(['id'])
             ->where('entity_type', 'PERSON')
-            ->where('entity_id', 1)
+            ->where('entity_id', $identifier['id'])
             ->firstOrFail();
         $model->entity_id = $entity->id;
         //todo é necessário implementar aqui a lógica de detach do hasOne para deletar

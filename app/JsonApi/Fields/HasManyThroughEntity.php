@@ -129,6 +129,7 @@ class HasManyThroughEntity extends HasManyThrough implements FillableToMany
      */
     private function setInverseToNull(Model $model, EloquentCollection $remove): void
     {
+        throw new \Exception('method not tested');
         $relation = $this->getRelation($model);
 
         /** @var Model $model */
@@ -147,7 +148,6 @@ class HasManyThroughEntity extends HasManyThrough implements FillableToMany
     */
     private function getRelation(Model $model)
     {
-        //todo [PV] Testar se isso vai dar certo
         $relation = $model->entity->{$this->relationName()}();
 
         if ($relation instanceof EloquentHasMany || $relation instanceof EloquentMorphMany) {
