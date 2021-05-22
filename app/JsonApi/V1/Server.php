@@ -4,6 +4,7 @@ namespace App\JsonApi\V1;
 
 use App\JsonApi\V1\Emails\EmailSchema;
 use App\JsonApi\V1\People\PersonSchema;
+use App\JsonApi\V1\Relationships\RelationshipSchema;
 use LaravelJsonApi\Core\Server\Server as BaseServer;
 
 class Server extends BaseServer
@@ -35,7 +36,8 @@ class Server extends BaseServer
     {
         return [
             PersonSchema::class,
-            EmailSchema::class
+            EmailSchema::class,
+            RelationshipSchema::class
         ];
     }
 }

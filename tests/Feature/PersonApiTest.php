@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Email;
 use App\Models\Person;
+use App\Models\Relationship;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use LaravelJsonApi\Testing\MakesJsonApiRequests;
@@ -23,6 +24,7 @@ class PersonApiTest extends TestCase
         $this->withoutExceptionHandling();
 
         $person = Person::factory()->make();
+        $relationships = Relationship::factory()->count(2)->create();
 
         $data = [
             'type' => 'people',
@@ -31,20 +33,39 @@ class PersonApiTest extends TestCase
                 'socialName' => $person->social_name,
                 'documentNumber' => $person->document_number,
                 'birthDate' => $person->birth_date
-            ]
+            ],
+            'relationships' => [
+                'relationships' => [
+                    'data' => $relationships->map(fn(Relationship $relationship) => [
+                        'type' => 'relationships',
+                        'id' => (string)$relationship->getRouteKey(),
+                    ])->all(),
+                ],
+            ],
         ];
 
         $response = $this
             ->jsonApi()
             ->expects('people')
             ->withData($data)
+            ->includePaths('relationships')
             ->post('/api/v1/people');
 
         $response->assertCreated();
 
+        $personId = $response->id();
+        $createdPerson = Person::find($personId);
         $this->assertDatabaseHas('people', [
-            'id' => $response->id()
+            'id' => $personId
         ]);
+
+        foreach ($relationships as $relationship){
+            $this->assertDatabaseHas('entity_relationship', [
+                'entity_id' => $createdPerson->entity->id,
+                'relationship_id' => $relationship->id
+            ]);
+        }
+
     }
 
     /**
@@ -72,6 +93,7 @@ class PersonApiTest extends TestCase
     {
         $person = Person::factory()->create();
         $person->entity->emails()->save(Email::factory()->make());
+        $person->entity->relationships()->attach(Relationship::factory()->count(2)->create());
         $self = 'http://localhost/api/v1/people/' . $person->getRouteKey();
 
         $expected = [
@@ -92,6 +114,12 @@ class PersonApiTest extends TestCase
                         'self' => "{$self}/relationships/emails",
                         'related' => "{$self}/emails",
                     ],
+                ],
+                'relationships' => [
+                    'links' => [
+                        'self' => "{$self}/relationships/relationships",
+                        'related' => "{$self}/relationships",
+                    ],
                 ]
             ],
             'links' => [
@@ -104,11 +132,11 @@ class PersonApiTest extends TestCase
             ->expects('people')
             ->get($self);
 
-        $response->assertFetchedOneExact($expected);
+        $response->assertFetchedOne($expected);
     }
 
     /** @test */
-    public function show_related_resources_testing()
+    public function show_related_emails()
     {
         $person = Person::factory()->create();
         $person->entity->emails()->saveMany(Email::factory()->count(2)->make());
@@ -122,35 +150,53 @@ class PersonApiTest extends TestCase
             ]
         ]);
 
+        //related resource
         $response = $this
             ->jsonApi()
             ->expects('emails')
             ->get('/api/v1/people/'.$person->getRouteKey().'/emails');
 
         $response->assertFetchedMany($expected);
+
+        //related ids
+        $response = $this
+            ->jsonApi()
+            ->expects('emails')
+            ->get('/api/v1/people/' . $person->getRouteKey() . '/relationships/emails');
+
+        $response->assertFetchedToMany($emails);
     }
 
+
     /** @test */
-    public function show_to_many_resources_testing()
+    public function show_related_relationships()
     {
         $person = Person::factory()->create();
-        $person->entity->emails()->saveMany(Email::factory()->count(2)->make());
-        $emails = $person->entity->emails;
+        $person->entity->relationships()->attach(Relationship::factory()->count(2)->create());
+        $relationships = $person->entity->relationships;
 
-        $expected = $emails->map(fn(Email $email)=> [
-            'type' =>  'emails',
-            'id'=> (string) $email->getRouteKey(),
+        $expected = $relationships->map(fn(Relationship $relationship) => [
+            'type' => 'relationships',
+            'id' => (string)$relationship->getRouteKey(),
             'attributes' => [
-                'address'=> $email->address
+                'description' => $relationship->description
             ]
         ]);
 
         $response = $this
             ->jsonApi()
-            ->expects('emails')
-            ->get('/api/v1/people/'.$person->getRouteKey().'/relationships/emails');
+            ->expects('relationships')
+            ->get('/api/v1/people/' . $person->getRouteKey() . '/relationships');
 
-        $response->assertFetchedToMany($emails);
+        $response->assertFetchedMany($expected);
+
+
+        $response = $this
+            ->jsonApi()
+            ->expects('relationships')
+            ->get('/api/v1/people/' . $person->getRouteKey() . '/relationships/relationships');
+
+        $response->assertFetchedToMany($relationships);
     }
 
     /** @test */
@@ -170,16 +216,12 @@ class PersonApiTest extends TestCase
            'id' => $person->getRouteKey()
         ]);
 
-        //using observers to delete related records
-        $this->assertDatabaseMissing('emails', [
-            'id' => $email->getRouteKey()
-        ]);
     }
 
     /** @test
      * @link https://laraveljsonapi.io/docs/1.0/testing/relationships.html#detach-to-many-testing
      */
-    public function detach_to_many_test()
+    public function detach_emails_relationship()
     {
         $this->withoutExceptionHandling();
 
@@ -189,14 +231,14 @@ class PersonApiTest extends TestCase
 
         $data = $emailsToDetach->map(fn(Email $email) => [
             'type' => 'emails',
-            'id' => (string) $email->getRouteKey(),
+            'id' => (string)$email->getRouteKey(),
         ])->all();
 
         $response = $this
             ->jsonApi()
             ->expects('emails')
             ->withData($data)
-            ->delete('/api/v1/people/'.$person->getRouteKey().'/relationships/emails');
+            ->delete('/api/v1/people/' . $person->getRouteKey() . '/relationships/emails');
 
         $response->assertNoContent();
 
@@ -204,6 +246,39 @@ class PersonApiTest extends TestCase
         foreach ($emailsToDetach as $email) {
             $this->assertDatabaseMissing('emails', [
                 'id' => $email->getKey(),
+                'entity_id' => $person->entity->id,
+            ]);
+        }
+    }
+
+
+    /**
+     * @test
+     */
+    public function detach_relationships_relationship()
+    {
+        $this->withoutExceptionHandling();
+
+        $person = Person::factory()->create();
+        $person->entity->relationships()->attach(Relationship::factory()->count(2)->create());
+        $relationshipsToDetach = $person->entity->relationships;
+
+        $data = $relationshipsToDetach->map(fn(Relationship $relationship) => [
+            'type' => 'relationships',
+            'id' => (string)$relationship->getRouteKey(),
+        ])->all();
+
+        $response = $this
+            ->jsonApi()
+            ->expects('relationships')
+            ->withData($data)
+            ->delete('/api/v1/people/' . $person->getRouteKey() . '/relationships/relationships');
+
+        $response->assertNoContent();
+
+        foreach ($relationshipsToDetach as $relationship) {
+            $this->assertDatabaseMissing('entity_relationship', [
+                'id' => $relationship->getKey(),
                 'entity_id' => $person->entity->id,
             ]);
         }

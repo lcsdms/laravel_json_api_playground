@@ -65,8 +65,8 @@ class Entity extends Model
         return $this->belongsToMany(Relationship::class);
     }
 
-    public function classifications()
-    {
-        return $this->belongsToMany(Classification::class);
-    }
+//    public function classifications()
+//    {
+//        return $this->belongsToMany(Classification::class);
+//    }
 }

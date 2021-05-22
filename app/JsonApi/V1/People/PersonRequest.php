@@ -21,7 +21,8 @@ class PersonRequest extends ResourceRequest
             'socialName' => 'nullable|string|max:200',
             'birthDate' => 'nullable|date',
             'documentNumber' => 'nullable|string|max:32',
-            'emails'=> JsonApiRule::toMany()
+            'emails'=> JsonApiRule::toMany(),
+            'relationships'=> JsonApiRule::toMany()
         ];
     }
 

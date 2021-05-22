@@ -13,10 +13,4 @@ class PersonObserver
         $person->entity()->save($entity);
     }
 
-    public function deleted(Person $person)
-    {
-        $entity = $person->entity;
-        $entity->emails()->delete();
-    }
-
 }
