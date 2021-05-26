@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany as EloquentHasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany as EloquentMorphMany;
-use Illuminate\Http\Request;
 use LaravelJsonApi\Eloquent\Contracts\FillableToMany;
 use LaravelJsonApi\Eloquent\Fields\Concerns\ReadOnly;
-use LaravelJsonApi\Eloquent\Fields\Relations\HasMany;
 use LaravelJsonApi\Eloquent\Fields\Relations\HasManyThrough;
 use Neomerx\JsonApi\Exceptions\LogicException;
 
@@ -64,8 +62,6 @@ class HasManyThroughEntity extends HasManyThrough implements FillableToMany
         $model->unsetRelation($this->relationName());
 
         return $models;
-        // TODO: Implement detach() method.
-        //todo implementar a regra de deletar os registros no detach também, conforme hasMany
     }
 
 
