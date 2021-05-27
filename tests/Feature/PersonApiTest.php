@@ -281,6 +281,12 @@ class PersonApiTest extends TestCase
                 'id' => $relationship->getKey(),
                 'entity_id' => $person->entity->id,
             ]);
+
+            //Should not mess with relationships table
+            $this->assertDatabaseHas('relationships', [
+                'id' => $relationship->getKey(),
+            ]);
         }
+
     }
 }
